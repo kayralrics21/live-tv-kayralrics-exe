@@ -13,7 +13,9 @@ assert(html.includes('kayralrics.com'),'Brand credit missing');
 assert(html.includes("'./vendor/hls.min.js'")&&html.includes("'./vendor/dash.all.min.js'"),'Local player URLs missing');
 const match=html.match(/<script>([\s\S]*?)<\/script>/);
 assert(match,'Main script missing');
-const hash=crypto.createHash('sha256').update(match[1]).digest('base64');
+
+const hash=crypto.createHash('sha256').update(match[1].replace(/\r\n?/g, '\n')).digest('base64');
+
 assert(html.includes("'sha256-"+hash+"'"),'HTML CSP script hash does not match JS');
 const host=fs.readFileSync(path.join(root,'main.cjs'),'utf8');
 assert(host.includes('nodeIntegration:false')&&host.includes('sandbox:true')&&host.includes('contextIsolation:true'),'Missing Electron security settings');
