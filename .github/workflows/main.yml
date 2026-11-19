@@ -1,0 +1,44 @@
+
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Build Setup and Portable EXE
+    runs-on: windows-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Verify project
+        run: npm run verify
+
+      - name: Build Windows EXE
+        run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload EXE files
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-tv-windows-exe
+          path: dist/*.exe
+          if-no-files-found: error
+          retention-days: 30
